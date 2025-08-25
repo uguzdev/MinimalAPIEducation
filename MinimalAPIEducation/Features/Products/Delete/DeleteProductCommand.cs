@@ -1,0 +1,5 @@
+using MediatR;
+
+namespace MinimalAPIEducation.Features.Products.Delete;
+
+public record DeleteProductCommand(int Id) : IRequest<Unit>;

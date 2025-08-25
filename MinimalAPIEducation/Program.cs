@@ -5,9 +5,13 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddExtension(builder.Configuration);
+builder.Services.AddCommonServiceExt(builder.Configuration);
+
 
 var app = builder.Build();
+
+// Group endpoints
+app.AddProductGroupEndpointExt();
 
 if (app.Environment.IsDevelopment())
 {
@@ -15,6 +19,5 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.ProductEndpoint();
 
 app.Run();

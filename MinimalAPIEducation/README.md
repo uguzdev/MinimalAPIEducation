@@ -1,10 +1,21 @@
 # OZET
 
-- dtolar olusturuldu
-- meta datalar eklendi
-- manuel mapping yapildi
+- mediatr ve minimalapi group kullanilarak endpointler ilgili klasorlerde olusturuldu
+- validation kutuphanesi FluentValidation.AspNetCore kuruldu
+- minimalapi de fluentvalidtion direk calismadigi icin validation pipeline olusturuldu ve EndpointFilter ile
+  calistirildi
 
-# Eksileri
+# EKSIKLER
 
-- Tekrar eden kodlar validation islemleri icin FluentValidation paketi kurulacak
-- Manuel mapping yerine AutoMapper paketi kurulacak
+- ServiceResult pattern kurulacak
+- Durum kodu eslestirme saglanacak
+
+# Kurulan Paketler
+
+- MediatR
+- FluentValidation.AspNetCore
+
+# MediaR
+
+- Handler -> Service
+- Endpoint -> Controller
