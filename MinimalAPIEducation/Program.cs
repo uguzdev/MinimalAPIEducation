@@ -1,4 +1,5 @@
 using MinimalAPIEducation.Extensions;
+using MinimalAPIEducation.Features.Products;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,5 +15,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.ProductEndpoint();
 
 app.Run();
