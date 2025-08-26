@@ -39,7 +39,7 @@ Yeni **versiyonda**, tüm endpointlerde tekrar eden `switch` kontrollerini kald�
 üzerinden otomatik olarak doğru HTTP cevaba dönüştürebileceğiz; böylece endpoint kodu hem daha temiz hem de tek tip ve
 okunabilir olacak.
 
-# MediaR
+# NOT
 
-- Handler -> Service
-- Endpoint -> Controller
+ServiceResult’ı isterseniz kendi yöntemlerinizle manuel olarak oluşturabilirsiniz, isterseniz de hazır NuGet paketleri
+ile hızlı ve standart bir şekilde kullanabilirsiniz.
