@@ -1,15 +1,19 @@
+using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MinimalAPIEducation.Features.Products.Dtos;
 using MinimalAPIEducation.Repositories;
+using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.GetById;
 
-public class GetProductByIdHandler(AppDbContext context) : IRequestHandler<GetProductByIdQuery, ProductResponse>
+public class GetProductByIdHandler(AppDbContext context)
+    : IRequestHandler<GetProductByIdQuery, ServiceResult<ProductResponse>>
 {
-    public async Task<ProductResponse> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
+    public async Task<ServiceResult<ProductResponse>> Handle(GetProductByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        var productDto = await context.Products
+        var productAsDto = await context.Products
             .Include(p => p.Category)
             .Where(p => p.Id == request.Id)
             .Select(p => new ProductResponse(
@@ -20,6 +24,13 @@ public class GetProductByIdHandler(AppDbContext context) : IRequestHandler<GetPr
                 p.Category.Name
             )).FirstOrDefaultAsync(cancellationToken);
 
-        return productDto!;
+        if (productAsDto == null)
+            return ServiceResult<ProductResponse>.Error(
+                "Product Not Found",
+                HttpStatusCode.NotFound,
+                $"No product found with id {request.Id}"
+            );
+
+        return ServiceResult<ProductResponse>.SuccessAsOk(productAsDto);
     }
 }

@@ -1,25 +1,38 @@
+using System.Net;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using MinimalAPIEducation.Features.Products.Create;
 using MinimalAPIEducation.Repositories;
+using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.Update;
 
-public class UpdateProductCommandHandler(AppDbContext context) : IRequestHandler<UpdateProductCommand, Unit>
+public class UpdateProductCommandHandler(AppDbContext context) : IRequestHandler<UpdateProductCommand, ServiceResult>
 {
-    public async Task<Unit> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<ServiceResult> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var hasProduct = await context.Products.FindAsync([request.Id], cancellationToken);
+        bool hasCategory = await context.Categories.AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
+        if (!hasCategory)
+            return ServiceResult<CreateProductResponse>.Error(
+                "Invalid Category",
+                HttpStatusCode.BadRequest,
+                $"Category with id {request.CategoryId} does not exist."
+            );
 
-        if (hasProduct is null) throw new KeyNotFoundException("Product with the given ID not found.");
+        var hasProduct = await context.Products.FindAsync([request.Id], cancellationToken);
+        if (hasProduct is null)
+            return ServiceResult.Error(
+                "Not Found",
+                HttpStatusCode.NotFound,
+                $"Product with id {request.Id} not found."
+            );
+
 
         hasProduct.Name = request.Name;
         hasProduct.Price = request.Price;
         hasProduct.CategoryId = request.CategoryId;
 
         await context.SaveChangesAsync(cancellationToken);
-
-        // İşlem başarılı olduğunda Unit.Value döndürün
-        return Unit.Value;
+        return ServiceResult.SuccessAsNoContent();
     }
 }
-
-// => bos donus icin Unit.Value kullanilir

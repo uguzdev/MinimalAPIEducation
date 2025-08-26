@@ -1,13 +1,17 @@
+using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MinimalAPIEducation.Features.Products.Dtos;
 using MinimalAPIEducation.Repositories;
+using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.GetAll;
 
-public class GetAllProductsHandler(AppDbContext context) : IRequestHandler<GetAllProductsQuery, List<ProductResponse>>
+public class GetAllProductsHandler(AppDbContext context)
+    : IRequestHandler<GetAllProductsQuery, ServiceResult<List<ProductResponse>>>
 {
-    public async Task<List<ProductResponse>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
+    public async Task<ServiceResult<List<ProductResponse>>> Handle(GetAllProductsQuery request,
+        CancellationToken cancellationToken)
     {
         var products = await context.Products
             .AsNoTracking()
@@ -18,9 +22,11 @@ public class GetAllProductsHandler(AppDbContext context) : IRequestHandler<GetAl
                 p.Price,
                 p.CategoryId,
                 p.Category.Name
-            ))
-            .ToListAsync(cancellationToken);
+            )).ToListAsync(cancellationToken);
 
-        return products;
+        if (!products.Any())
+            return ServiceResult<List<ProductResponse>>.Error("No products found", HttpStatusCode.NotFound);
+
+        return ServiceResult<List<ProductResponse>>.SuccessAsOk(products);
     }
 }
