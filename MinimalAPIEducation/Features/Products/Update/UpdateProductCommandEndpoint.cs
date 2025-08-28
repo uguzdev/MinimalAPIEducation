@@ -17,7 +17,8 @@ public static class UpdateProductCommandEndpoint
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
             .WithSummary("Updates an existing product.")
-            .AddEndpointFilter<ValidationFilter<UpdateProductCommand>>(); // Validator pipeline
+            .AddEndpointFilter<ValidationFilter<UpdateProductCommand>>() // Validator pipeline
+            .MapToApiVersion(1, 0);
 
         return group;
     }

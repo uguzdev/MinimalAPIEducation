@@ -14,7 +14,8 @@ public static class DeleteProductCommandEndpoint
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
-            .WithSummary("Deletes a product by its ID.");
+            .WithSummary("Deletes a product by its ID.")
+            .MapToApiVersion(1, 0);
 
         return group;
     }

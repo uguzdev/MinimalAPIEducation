@@ -14,7 +14,8 @@ public static class GetAllProductsEndpoint
             .Produces<List<ProductResponse>>()
             .Produces<ProblemDetails>(StatusCodes.Status404NotFound)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
-            .WithSummary("Get all products");
+            .WithSummary("Get all products")
+            .MapToApiVersion(1, 0);
 
         return group;
     }

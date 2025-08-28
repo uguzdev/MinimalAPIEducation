@@ -16,7 +16,8 @@ public static class CreateProductCommandEndpoint
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
             .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError)
             .WithSummary("Creates a new product.")
-            .AddEndpointFilter<ValidationFilter<CreateProductCommand>>(); // Validator pipeline
+            .AddEndpointFilter<ValidationFilter<CreateProductCommand>>() // Validator pipeline
+            .MapToApiVersion(1, 0);
 
         return group;
     }

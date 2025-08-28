@@ -6,12 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddCommonServiceExt(builder.Configuration);
-
+builder.Services.AddVersioningExt();
 
 var app = builder.Build();
 
 // Group endpoints
-app.AddProductGroupEndpointExt();
+app.AddProductGroupEndpointExt(app.AddVersionSetExt());
 
 if (app.Environment.IsDevelopment())
 {
