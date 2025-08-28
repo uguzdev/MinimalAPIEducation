@@ -26,6 +26,10 @@ Bu handler’lar artık `ServiceResult` veya `ServiceResult<T>` döndürerek:
 
 - `ValidationFilter<T>` pipeline ile request validation kontrol edildi.
 - Category veya product yok gibi durumlar handler içinde kontrol edilip `ServiceResult.Error` döndürüldü.
+- Neden ayrı bir Validation sınıfı yazmak zorunda kaldık?
+    - Çünkü MVC projelerinde pipeline oluşturmamıza gerek yok. `FluentValidation` paketi direk devreye giriyor fakat
+      MinimalAPI projelerinde pipeline olusturmak zorundayiz.
+    - Ayrıca MinimalAPI'lerde 5 klasik filter yoktur. Burada bu işlemleri `Endpoint Filter` ile yapabiliriz.
 
 ### Avantajlarımız
 
