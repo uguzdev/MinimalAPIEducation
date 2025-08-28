@@ -2,7 +2,6 @@ using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MinimalAPIEducation.Repositories;
-using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.Create;
 

@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MinimalAPIEducation.Shared;
+namespace MinimalAPIEducation;
 
 public class ServiceResult
 {

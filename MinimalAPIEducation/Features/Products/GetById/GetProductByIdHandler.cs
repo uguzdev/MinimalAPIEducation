@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MinimalAPIEducation.Features.Products.Dtos;
 using MinimalAPIEducation.Repositories;
-using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.GetById;
 

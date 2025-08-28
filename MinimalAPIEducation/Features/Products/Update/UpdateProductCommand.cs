@@ -1,5 +1,4 @@
 using MediatR;
-using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.Update;
 

@@ -1,7 +1,6 @@
 using System.Net;
 using MediatR;
 using MinimalAPIEducation.Repositories;
-using MinimalAPIEducation.Shared;
 
 namespace MinimalAPIEducation.Features.Products.Delete;
 
