@@ -1,6 +1,6 @@
-using System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MinimalAPIEducation.Extensions;
 using MinimalAPIEducation.Filters;
 
 namespace MinimalAPIEducation.Features.Products.Update;
@@ -10,17 +10,7 @@ public static class UpdateProductCommandEndpoint
     public static RouteGroupBuilder UpdateProductGroupItemEndpoint(this RouteGroupBuilder group)
     {
         group.MapPut("/", async ([FromBody] UpdateProductCommand command, IMediator mediator) =>
-            {
-                var result = await mediator.Send(command);
-
-                return result.Status switch
-                {
-                    HttpStatusCode.NoContent => Results.NoContent(),
-                    HttpStatusCode.NotFound => Results.NotFound(result.Fail),
-                    HttpStatusCode.BadRequest => Results.BadRequest(result.Fail),
-                    _ => Results.Problem(result.Fail?.Detail)
-                };
-            })
+            (await mediator.Send(command)).ToHttpResult())
             .WithName("UpdateProduct")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)

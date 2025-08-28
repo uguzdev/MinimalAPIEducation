@@ -1,49 +1,35 @@
-# Service Result Pattern
+# Minimal API – Endpoint Pattern
 
-- ServiceResult, handler’ların hem veriyi hem de durum kodunu ve hata bilgisini tek bir obje içinde taşımasını sağlayan
-  bir yapıdır.
-- Başarılı işlemler için Data ve Status içerir.
-- Hatalı işlemler için Fail (ProblemDetails) ve Status içerir.
-- Bu sayede endpoint tarafında switch-case ile doğru HTTP status kodu ve response dönmek kolaylaşır.
+Bu proje, **.NET Minimal API** kullanarak endpoint’lerde **temiz ve okunabilir HTTP response yönetimi** sağlar.
 
-Kısaca: handler içinde status + data + error yönetimi yapmamıza yarar.
+---
 
-# OZET
+## Yapının Özeti
 
-## Handler ve ServiceResult Kullanımı
+* Endpoint’lerde switch-case veya uzun if blokları yazmadan **tek tip dönüş** sağlanıyor.
+* Response’lar tip güvenli ve okunabilir.
+* Swagger/OpenAPI uyumu için tüm olası status kodları `.Produces<...>` ile belgeleniyor.
 
-Bu handler’lar artık `ServiceResult` veya `ServiceResult<T>` döndürerek:
+---
 
-- **Başarılı durumda:** `200 OK`, `201 Created`, `204 NoContent`
-- **Hatalı durumda:** `400 BadRequest`, `404 NotFound` gibi status kodlarını taşıyor.
+### Endpoint Avantajları
 
-### Endpoints
+* Endpoint’ler **tek satır ile dönüş** sağlıyor.
+* Kod **temiz, kısa ve okunabilir**.
+* İş kuralları ve validation hataları kolayca yönetilebiliyor.
 
-- Tüm CRUD işlemleri endpoint tarafında `switch(result.Status)` ile HTTP response’a dönüştürüldü.
-- Swagger için `Produces<T>()` kullanılarak başarılı ve hata response tipleri tanımlandı.
+---
 
-### Validation ve Hata Yönetimi
+### Güncellemede Unutulan Kısım => Duplicate Kontrolü
 
-- `ValidationFilter<T>` pipeline ile request validation kontrol edildi.
-- Category veya product yok gibi durumlar handler içinde kontrol edilip `ServiceResult.Error` döndürüldü.
-- Neden ayrı bir Validation sınıfı yazmak zorunda kaldık?
-    - Çünkü MVC projelerinde pipeline oluşturmamıza gerek yok. `FluentValidation` paketi direk devreye giriyor fakat
-      MinimalAPI projelerinde pipeline olusturmak zorundayiz.
-    - Ayrıca MinimalAPI'lerde 5 klasik filter yoktur. Burada bu işlemleri `Endpoint Filter` ile yapabiliriz.
+* Ürün güncelleme işlemleri sırasında:
 
-### Avantajlarımız
+    * İlgili kategori var mı kontrol edilir.
+    * Ürün mevcut mu kontrol edilir.
+    * Aynı isim ve kategoride başka bir ürün varsa **409 Conflict** veya **400 BadRequest** dönülür.
+    * Güncelleme başarılıysa **204 NoContent** dönülür.
 
-- Endpoint içinde status kodu veya hata kontrolü yapmak gerekmez, handler bunu taşır.
-- Swagger ve client tarafı için tek tip response yönetimi sağlanır.
-- Kod daha temiz, okunabilir ve maintainable oldu.
+---
 
-# EKSIKLER
-
-Yeni **versiyonda**, tüm endpointlerde tekrar eden `switch` kontrollerini kaldırıp, ServiceResult’ı uzantı metodları
-üzerinden otomatik olarak doğru HTTP cevaba dönüştürebileceğiz; böylece endpoint kodu hem daha temiz hem de tek tip ve
-okunabilir olacak.
-
-# NOT
-
-ServiceResult’ı isterseniz kendi yöntemlerinizle manuel olarak oluşturabilirsiniz, isterseniz de hazır NuGet paketleri
-ile hızlı ve standart bir şekilde kullanabilirsiniz.
+![img.png](img.png)
+Bu resimde aradaki kod farkını görebilrisiniz her endpointe switch yazmaktan bizi kurtardı

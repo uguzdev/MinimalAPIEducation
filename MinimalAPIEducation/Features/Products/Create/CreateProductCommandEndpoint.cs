@@ -1,6 +1,6 @@
-using System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MinimalAPIEducation.Extensions;
 using MinimalAPIEducation.Filters;
 
 namespace MinimalAPIEducation.Features.Products.Create;
@@ -10,16 +10,7 @@ public static class CreateProductCommandEndpoint
     public static RouteGroupBuilder CreateProductGroupItemEndpoint(this RouteGroupBuilder group)
     {
         group.MapPost("/", async ([FromBody] CreateProductCommand command, IMediator mediator) =>
-            {
-                var result = await mediator.Send(command);
-
-                return result.Status switch
-                {
-                    HttpStatusCode.Created => Results.Created(result.UrlAsCreated!, result.Data),
-                    HttpStatusCode.BadRequest => Results.BadRequest(result.Fail),
-                    _ => Results.Problem(result.Fail?.Detail)
-                };
-            })
+            (await mediator.Send(command)).ToHttpResult())
             .WithName("CreateProduct")
             .Produces<CreateProductResponse>(StatusCodes.Status201Created)
             .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)

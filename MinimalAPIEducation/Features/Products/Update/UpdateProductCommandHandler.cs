@@ -26,6 +26,17 @@ public class UpdateProductCommandHandler(AppDbContext context) : IRequestHandler
                 $"Product with id {request.Id} not found."
             );
 
+        bool duplicateExists = await context.Products
+            .AnyAsync(p => p.Id != request.Id && p.Name == request.Name && p.CategoryId == request.CategoryId,
+                cancellationToken);
+
+        if (duplicateExists)
+            return ServiceResult.Error(
+                "Duplicate Product",
+                HttpStatusCode.BadRequest,
+                $"Another product with name '{request.Name}' already exists in this category."
+            );
+
 
         hasProduct.Name = request.Name;
         hasProduct.Price = request.Price;
