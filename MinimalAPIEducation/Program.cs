@@ -8,6 +8,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddCommonServiceExt(builder.Configuration);
 builder.Services.AddVersioningExt();
 
+// Redis
+builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = "localhost:6379"; });
+
 var app = builder.Build();
 
 // Group endpoints

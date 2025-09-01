@@ -1,17 +1,20 @@
 using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using MinimalAPIEducation.Repositories;
 
 namespace MinimalAPIEducation.Features.Products.Create;
 
-public class CreateProductCommandHandler(AppDbContext context)
+public class CreateProductCommandHandler(AppDbContext context, IDistributedCache cache)
     : IRequestHandler<CreateProductCommand, ServiceResult<CreateProductResponse>>
 {
+    private const string AllProductsCacheKey = "products:all";
+
     public async Task<ServiceResult<CreateProductResponse>> Handle(CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        bool hasCategory = await context.Categories.AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
+        var hasCategory = await context.Categories.AnyAsync(c => c.Id == request.CategoryId, cancellationToken);
         if (!hasCategory)
             return ServiceResult<CreateProductResponse>.Error(
                 "Invalid Category",
@@ -19,7 +22,7 @@ public class CreateProductCommandHandler(AppDbContext context)
                 $"Category with id {request.CategoryId} does not exist."
             );
 
-        bool hasProduct = await context.Products.AnyAsync(x => x.Name == request.Name, cancellationToken);
+        var hasProduct = await context.Products.AnyAsync(x => x.Name == request.Name, cancellationToken);
         if (hasProduct)
             return ServiceResult<CreateProductResponse>.Error(
                 "Product Already Exists",
@@ -37,6 +40,9 @@ public class CreateProductCommandHandler(AppDbContext context)
 
         context.Products.Add(product);
         await context.SaveChangesAsync(cancellationToken);
+
+        // Products cache’i temizle
+        await cache.RemoveAsync(AllProductsCacheKey, cancellationToken);
 
         var response = new CreateProductResponse(product.Id);
         return ServiceResult<CreateProductResponse>.SuccessAsCreated(response, $"/api/products/{product.Id}");
