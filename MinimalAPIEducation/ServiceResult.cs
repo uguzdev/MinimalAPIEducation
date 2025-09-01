@@ -6,7 +6,7 @@ namespace MinimalAPIEducation;
 
 public class ServiceResult
 {
-    [JsonIgnore] public HttpStatusCode Status { get; set; }
+    public HttpStatusCode Status { get; set; }
     public ProblemDetails? Fail { get; set; }
     [JsonIgnore] public bool IsSuccess => Fail == null;
     [JsonIgnore] public bool IsFail => !IsSuccess;

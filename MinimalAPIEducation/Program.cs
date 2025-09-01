@@ -1,3 +1,5 @@
+using MediatR;
+using MinimalAPIEducation.Common.Caching;
 using MinimalAPIEducation.Extensions;
 using MinimalAPIEducation.Features.Products;
 using Scalar.AspNetCore;
@@ -10,6 +12,8 @@ builder.Services.AddVersioningExt();
 
 // Redis
 builder.Services.AddStackExchangeRedisCache(options => { options.Configuration = "localhost:6379"; });
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
 
 var app = builder.Build();
 

@@ -2,16 +2,14 @@ using System.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using MinimalAPIEducation.Common.Caching;
 using MinimalAPIEducation.Features.Products.Create;
 using MinimalAPIEducation.Repositories;
 
 namespace MinimalAPIEducation.Features.Products.Update;
 
-public class UpdateProductCommandHandler(AppDbContext context, IDistributedCache cache)
-    : IRequestHandler<UpdateProductCommand, ServiceResult>
+public class UpdateProductCommandHandler(AppDbContext context, IDistributedCache cache) : IRequestHandler<UpdateProductCommand, ServiceResult>
 {
-    private const string AllProductsCacheKey = "products:all";
-
     public async Task<ServiceResult> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         // Kategori kontrolü
@@ -44,16 +42,15 @@ public class UpdateProductCommandHandler(AppDbContext context, IDistributedCache
                 $"Another product with name '{request.Name}' already exists in this category."
             );
 
-        // Güncellew
+        // Güncelle
         hasProduct.Name = request.Name;
         hasProduct.Price = request.Price;
         hasProduct.CategoryId = request.CategoryId;
         await context.SaveChangesAsync(cancellationToken);
 
         // Cache temizle
-        var productCacheKey = $"product:{request.Id}";
-        await cache.RemoveAsync(AllProductsCacheKey, cancellationToken);
-        await cache.RemoveAsync(productCacheKey, cancellationToken);
+        await cache.RemoveAsync(CacheSettings.Keys.ProductsAll, cancellationToken);
+        await cache.RemoveAsync(CacheSettings.Keys.Product(request.Id), cancellationToken);
 
         return ServiceResult.SuccessAsNoContent();
     }

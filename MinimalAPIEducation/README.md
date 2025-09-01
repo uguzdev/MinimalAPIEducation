@@ -57,9 +57,38 @@ Ayrıca Redis Insight uygulaması ile de verilerinizi inceleyebilirsiniz ve test
 - **Redis’in gelişmiş özelliklerini (listeler, pub/sub, stream) kullanmak istiyorsan**  
   → `StackExchange.Redis` kullanmalısın.
 
-# NOT
+# MediatR Caching Behavior
 
-- İkisinin de implementasyonu kolaydır, ama şu anda biz `IDistributedCache` kullandık.
-- Fark ettiyseniz yine handlerlarımızın içerisinde tekrar eden kodlarımız var bunlardan kurtulmak için yardımcı bir
-  service yazabiliriz
+Bu proje, MediatR pipeline davranışları (Behavior) kullanarak **cache mekanizmasını merkezi ve tekrar kullanılabilir şekilde** yönetir.
+
+## Neden MediatR Behavior ile Cache?
+
+* **Classic yaklaşımlar:** Her handler içinde cache kontrolü ve cache’e yazma kodunu yazmak zorundaydık.
+  Örnek: `GetAllProductsHandler` veya `GetProductByIdHandler` içinde sürekli `IDistributedCache` erişimi, JSON serialize/deserialize, expiration ayarları vs.
+* **Dezavantajları:**
+
+    * Kod tekrarına (duplication) yol açar.
+    * Handler’lar artık sadece iş mantığını değil, cache detaylarını da yönetmek zorunda kalır.
+    * Cache stratejisini değiştirmek (Redis → MemoryCache gibi) tüm handler’ları güncellemek anlamına gelir.
+
+---
+
+## Behavior ile Çözüm
+
+* `CachingBehavior<TRequest, TResponse>` sınıfı, pipeline’daki tüm request’ler için **cache kontrolü ve cache’e yazma işlemini tek noktadan** yapar.
+* Sadece `ICacheable` implement eden request’ler cache’e alınır.
+* Handler’lar **yalnızca iş mantığını** yazar, cache kodu ile uğraşmaz.
+
+### Avantajları
+
+1. **Tekrarsız kod** – Tüm caching işlemleri merkezi.
+2. **Kolay yönetim** – Cache stratejisi değişirse sadece behavior güncellenir.
+3. **Temiz handler’lar** – Handler sadece veri erişim ve iş mantığına odaklanır.
+4. **Esneklik** – Yeni query/command eklemek için sadece `ICacheable` implement etmek yeterli.
+
+---
+
+Bu sayede, klasik handler içi cache kodlarından kurtulduk ve projemiz **daha sürdürülebilir, temiz ve merkezi cache yönetimli** bir yapıya kavuştu.
+
+
 
