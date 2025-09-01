@@ -2,6 +2,18 @@
 
 - Microsoft.Extensions.Caching.StackExchangeRedis
 
+# Docker ile Redis
+
+```shell
+docker run -d --name redis -p 6379:6379 redis
+```
+
+Redis’i ayağa kaldırdıktan sonra, sadece Program.cs içerisine gerekli konfigürasyonu eklemeniz yeterlidir. Bu sayede
+verileriniz local ortamda Redis’e kaydedilecektir.
+
+![img.png](img.png)
+Ayrıca Redis Insight uygulaması ile de verilerinizi inceleyebilirsiniz ve testlerinizi yapabilirsiniz.
+
 # Redis
 
 .NET projelerinde Redis kullanımı için iki farklı yaklaşımı özetler:  
