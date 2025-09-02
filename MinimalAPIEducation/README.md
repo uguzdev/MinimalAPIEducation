@@ -1,8 +1,8 @@
-# PAKETLER
+# GEREKLi PAKETLER
 
 - Microsoft.Extensions.Caching.StackExchangeRedis
 
-# Docker ile Redis
+# REDIS DOCKER KURULUMU
 
 ```shell
 docker run -d --name redis -p 6379:6379 redis
