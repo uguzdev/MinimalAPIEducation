@@ -1,94 +1,43 @@
-# PAKETLER
+# GEREKLİ PAKETLER
 
-- Microsoft.Extensions.Caching.StackExchangeRedis
+- OpenTelemetry.Extensions.Hosting
+- OpenTelemetry.Instrumentation.AspNetCore
+- OpenTelemetry.Instrumentation.EntityFrameworkCore
+- OpenTelemetry.Exporter.Console
+- OpenTelemetry.Exporter.OpenTelemetryProtocol
 
-# Docker ile Redis
+# Jaeger Docker Kurulumu
 
 ```shell
-docker run -d --name redis -p 6379:6379 redis
+docker run --rm --name jaeger  -p 16686:16686 -p 4317:4317 -p 4318:4318 jaegertracing/jaeger:2.5.0
 ```
 
-Redis’i ayağa kaldırdıktan sonra, sadece Program.cs içerisine gerekli konfigürasyonu eklemeniz yeterlidir. Bu sayede
-verileriniz local ortamda Redis’e kaydedilecektir.
+- http://localhost:16686 bu url istek attığımızda Jaeger UI gidebiliriz.
+- Configuration ayarlarını Program.cs içerisine yaptık
+
+# OpenTelemetry Nedir?
+
+OpenTelemetry, bulut tabanlı yazılımlar için telemetri verisi (metrikler, izler ve loglar) toplamak amacıyla oluşturulmuş açık kaynaklı bir projedir. Farklı dillerde (ASP.NET,
+Java,
+Python,
+Go, Node.js vb.) uygulamalarınızdan telemetri verisi toplamak için standart bir API, SDK ve araçlar sunar. Bu sayede, uygulamanızdan bağımsız olarak telemetri verisi üretebilir ve
+istediğiniz bir arka uç (backend) sistemine gönderebilirsiniz. OpenTelemetry'nin temel amacı, uygulamalardaki izlenebilirliği (observability) kolaylaştırmaktır.
+
+## Jaeger Neden Gerekli?
+
+Uygulamalarınızdan topladığınız izleme (tracing) verilerini anlamlandırmak için Jaeger gibi bir araç gerekir. Jaeger, OpenTelemetry tarafından gönderilen izleme verilerini (trace)
+alır, depolar ve bu verileri görsel bir şekilde sunar.
+
+- Jaeger'ın başlıca faydaları şunlardır:
+    - Dağıtık İzleme (Distributed Tracing): Microservice mimarilerinde bir isteğin birden fazla servisi nasıl dolaştığını gösteren izleri görselleştirir. Bu sayede, performansı
+      düşüren veya hataya neden olan servisleri kolayca bulmanızı sağlar.
+    - Hata Ayıklama (Troubleshooting): Hataların veya gecikmelerin hangi servis katmanında meydana geldiğini anlamak için izleri analiz etmenizi sağlar.
+    - Performans Optimizasyonu: Bir işlemin hangi aşamasının en uzun sürdüğünü görerek sistem performansını optimize etmenize yardımcı olur.
+
+Kısacası, OpenTelemetry veriyi toplar, Jaeger ise bu veriyi anlaşılır bir şekilde sunarak sisteminizin durumunu ve performansını izlemenizi sağlar.
+
+# NOT
+
+- Bizler trace verilerimizi hem Jaegera hemde consola yazdırdık
 
 ![img.png](img.png)
-Ayrıca Redis Insight uygulaması ile de verilerinizi inceleyebilirsiniz ve testlerinizi yapabilirsiniz.
-
-# Redis
-
-.NET projelerinde Redis kullanımı için iki farklı yaklaşımı özetler:  
-**`IDistributedCache`** ve **`StackExchange.Redis`**.
-
-## IDistributedCache
-
-- **Microsoft.Extensions.Caching.Distributed** namespace’i altında gelir.
-- **Abstraction (soyutlama)** sağlar.
-- Redis dışında **SQL Server cache**, **NCache**, **Memory cache** gibi farklı implementasyonlarla da kullanılabilir.
-- Basit CRUD tarzı methodlar sunar:
-    - `GetStringAsync`
-    - `SetStringAsync`
-    - `RemoveAsync`
-
-👉 Avantaj: Kolay kullanım, provider bağımsız.  
-👉 Dezavantaj: Gelişmiş Redis özelliklerini (pub/sub, list, hash, stream vs.) desteklemez.
-
----
-
-## StackExchange.Redis
-
-- Redis için **low-level, güçlü bir kütüphane**.
-- Microsoft’un önerdiği **resmi Redis client**.
-- Çok daha fazla method ve veri yapısını destekler:
-    - String, Hash, List, Set, Sorted Set
-    - Pub/Sub (mesajlaşma)
-    - Transactions, Pipelining
-    - Lua scripting
-
-👉 Avantaj: Redis’in tüm özelliklerine erişim.  
-👉 Dezavantaj: Redis’e sıkı sıkıya bağlı (abstraction yok). Başka bir cache sağlayıcısına geçmek zor olur.
-
----
-
-## 3. Ne Zaman Hangisi?
-
-- **Sadece basit cache (key-value) lazımsa**  
-  → `IDistributedCache` yeterli olur.
-
-- **Redis’in gelişmiş özelliklerini (listeler, pub/sub, stream) kullanmak istiyorsan**  
-  → `StackExchange.Redis` kullanmalısın.
-
-# MediatR Caching Behavior
-
-Bu proje, MediatR pipeline davranışları (Behavior) kullanarak **cache mekanizmasını merkezi ve tekrar kullanılabilir şekilde** yönetir.
-
-## Neden MediatR Behavior ile Cache?
-
-* **Classic yaklaşımlar:** Her handler içinde cache kontrolü ve cache’e yazma kodunu yazmak zorundaydık.
-  Örnek: `GetAllProductsHandler` veya `GetProductByIdHandler` içinde sürekli `IDistributedCache` erişimi, JSON serialize/deserialize, expiration ayarları vs.
-* **Dezavantajları:**
-
-    * Kod tekrarına (duplication) yol açar.
-    * Handler’lar artık sadece iş mantığını değil, cache detaylarını da yönetmek zorunda kalır.
-    * Cache stratejisini değiştirmek (Redis → MemoryCache gibi) tüm handler’ları güncellemek anlamına gelir.
-
----
-
-## Behavior ile Çözüm
-
-* `CachingBehavior<TRequest, TResponse>` sınıfı, pipeline’daki tüm request’ler için **cache kontrolü ve cache’e yazma işlemini tek noktadan** yapar.
-* Sadece `ICacheable` implement eden request’ler cache’e alınır.
-* Handler’lar **yalnızca iş mantığını** yazar, cache kodu ile uğraşmaz.
-
-### Avantajları
-
-1. **Tekrarsız kod** – Tüm caching işlemleri merkezi.
-2. **Kolay yönetim** – Cache stratejisi değişirse sadece behavior güncellenir.
-3. **Temiz handler’lar** – Handler sadece veri erişim ve iş mantığına odaklanır.
-4. **Esneklik** – Yeni query/command eklemek için sadece `ICacheable` implement etmek yeterli.
-
----
-
-Bu sayede, klasik handler içi cache kodlarından kurtulduk ve projemiz **daha sürdürülebilir, temiz ve merkezi cache yönetimli** bir yapıya kavuştu.
-
-
-
